@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "98617297491",
+    "firebase_url": "https://three-three-five-five-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "three-three-five-five",
+    "storage_bucket": "three-three-five-five.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:98617297491:android:9a564e425d343e530614a6",
+        "android_client_info": {
+          "package_name": "com.sukonbu04299.ttff"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMidFTeGeRet4BkKm_B6_oMwZBYfkmc4o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
