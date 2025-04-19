@@ -76,6 +76,99 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  void _showNotifications() async {
+    final notifications = await _firebase.getNotifications();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          '공지사항',
+          style: TextStyle(
+            fontFamily: "Pat",
+            fontSize: 24,
+            color: Colors.green[800],
+          ),
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: notifications.isEmpty
+              ? SizedBox(
+                  height: 200,
+                  child: Center(
+                    child: Text(
+                      '공지사항이 없습니다.',
+                      style: TextStyle(
+                        fontFamily: "Pat",
+                        fontSize: 18,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                )
+              : ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: notifications.length,
+                  itemBuilder: (context, index) {
+                    final notification = notifications[index];
+                    return Card(
+                      margin: EdgeInsets.symmetric(vertical: 8.0),
+                      child: Padding(
+                        padding: EdgeInsets.all(12.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              notification['title'],
+                              style: TextStyle(
+                                fontFamily: "Pat",
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green[800],
+                              ),
+                            ),
+                            SizedBox(height: 8.0),
+                            Text(
+                              notification['content'],
+                              style: TextStyle(
+                                fontFamily: "Pat",
+                                fontSize: 16,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            SizedBox(height: 8.0),
+                            Text(
+                              notification['timestamp'].toString(),
+                              style: TextStyle(
+                                fontFamily: "Pat",
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              '닫기',
+              style: TextStyle(
+                fontFamily: "Pat",
+                fontSize: 18,
+                color: Colors.green[800],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildMessageItem(Map<dynamic, dynamic> message) {
     CrossAxisAlignment align = CrossAxisAlignment.start;
     TextAlign textalign = TextAlign.start;
@@ -85,112 +178,129 @@ class _ChatScreenState extends State<ChatScreen> {
       textalign = TextAlign.end;
     }
 
-    if (message['type'] == 'image') {
-      return Padding(
-        padding: EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: align,
-          children: [
-            Text(
-              message['senderNickname'],
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
-                fontFamily: "Pat",
+    return MessageItem(
+      nickname: message['senderNickname'],
+      type: message['type'],
+      content:
+          message['type'] == 'image' ? message['imageUrl'] : message['text'],
+      timestamp: message['timestamp'],
+      align: align,
+      textalign: textalign,
+    );
+  }
+
+  Widget MessageItem({
+    required String nickname,
+    required String type,
+    required String content,
+    required int timestamp,
+    required CrossAxisAlignment align,
+    required TextAlign textalign,
+  }) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      child: Column(
+        crossAxisAlignment: align,
+        children: [
+          Container(
+            padding: EdgeInsets.all(12.0),
+            decoration: BoxDecoration(
+              color: Colors.green[50],
+              borderRadius: BorderRadius.circular(16.0),
+              border: Border.all(
+                color: Colors.green[200]!,
+                width: 1.0,
               ),
             ),
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Scaffold(
-                      appBar: AppBar(
-                        title: Text(
-                          '자세히 보기',
-                          style: TextStyle(
-                            fontSize: 26,
-                            color: Colors.black,
-                            fontFamily: "Pat",
+            child: Column(
+              crossAxisAlignment: align,
+              children: [
+                Text(
+                  nickname,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.green[800],
+                    fontFamily: "Pat",
+                  ),
+                ),
+                SizedBox(height: 8.0),
+                type == 'text'
+                    ? Text(
+                        content,
+                        textAlign: textalign,
+                        style: TextStyle(
+                          fontFamily: "Pat",
+                          fontSize: 22,
+                          color: Colors.black87,
+                        ),
+                      )
+                    : GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Scaffold(
+                                appBar: AppBar(
+                                  title: Text(
+                                    '자세히 보기',
+                                    style: TextStyle(
+                                      fontSize: 26,
+                                      fontFamily: "Pat",
+                                    ),
+                                  ),
+                                ),
+                                body: PhotoView(
+                                  imageProvider: NetworkImage(content),
+                                  minScale: PhotoViewComputedScale.contained,
+                                  maxScale: PhotoViewComputedScale.covered * 2,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: Image.network(
+                            content,
+                            width: 200,
+                            height: 200,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return CircularProgressIndicator();
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              return Text('Error loading image');
+                            },
                           ),
                         ),
                       ),
-                      body: PhotoView(
-                        imageProvider: NetworkImage(message['imageUrl']),
-                        minScale: PhotoViewComputedScale.contained,
-                        maxScale: PhotoViewComputedScale.covered * 2,
-                      ),
-                    ),
-                  ),
-                );
-              },
-              child: Image.network(
-                message['imageUrl'],
-                width: 200,
-                height: 200,
-                fit: BoxFit.cover,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return CircularProgressIndicator();
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  return Text('Error loading image');
-                },
-              ),
+              ],
             ),
-            Text(
-              DateTime.fromMillisecondsSinceEpoch(message['timestamp'])
-                  .toString(),
-              textAlign: textalign,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
-                fontFamily: "Pat",
-              ),
-            ),
-          ],
-        ),
-      );
-    } else {
-      return ListTile(
-        title: Column(
-          crossAxisAlignment: align,
-          children: [
-            Text(
-              message['senderNickname'],
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
-                fontFamily: "Pat",
-              ),
-            ),
-            Text(
-              message['text'],
-              textAlign: textalign,
-              style: TextStyle(
-                fontFamily: "Pat",
-                fontSize: 22,
-              ),
-            ),
-          ],
-        ),
-        subtitle: Text(
-          DateTime.fromMillisecondsSinceEpoch(message['timestamp']).toString(),
-          textAlign: textalign,
-          style: TextStyle(
-            fontFamily: "Pat",
           ),
-        ),
-      );
-    }
+          Padding(
+            padding: EdgeInsets.fromLTRB(8.0, 4.0, 0, 0),
+            child: Text(
+              DateTime.fromMillisecondsSinceEpoch(timestamp)
+                  .toString()
+                  .substring(5, 19),
+              textAlign: textalign,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.green[600],
+                fontFamily: "Pat",
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: Drawer(
-          // TODO: User Settings
-          ),
+      backgroundColor: Colors.white70,
       appBar: AppBar(
         title: Text(
           '질문방 ${widget.roomNumber}',
@@ -198,6 +308,11 @@ class _ChatScreenState extends State<ChatScreen> {
             fontFamily: "Pat",
             fontSize: 30,
           ),
+        ),
+        centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.notifications),
+          onPressed: _showNotifications,
         ),
       ),
       body: Column(
@@ -217,10 +332,12 @@ class _ChatScreenState extends State<ChatScreen> {
                   child: TextField(
                     controller: _controller,
                     decoration: InputDecoration(
-                      hintText: '질문하기',
+                      hintText: '질문하고 답하기',
                       border: OutlineInputBorder(),
                     ),
-                    style: TextStyle(fontFamily: "Pat"),
+                    style: TextStyle(
+                      fontFamily: "Pat",
+                    ),
                   ),
                 ),
                 IconButton(

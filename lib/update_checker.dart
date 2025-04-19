@@ -6,7 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 class UpdateChecker {
   static const String githubRepoOwner = 'sukonbu04299';
-  static const String githubRepoName = 'ttff';
+  static const String githubRepoName = 'three-three-five-five';
   static const String githubApiUrl =
       'https://api.github.com/repos/$githubRepoOwner/$githubRepoName/releases/latest';
 

@@ -5,7 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class FirebaseService {
   static final FirebaseService _instance = FirebaseService._internal();
@@ -24,21 +23,6 @@ class FirebaseService {
   Future<void> initializeUser() async {
     await _getOrCreateUuid();
     await _registerUser();
-    //await _getPermissions();
-  }
-
-  Future<void> _getPermissions() async {
-    final status = await Permission.camera.request();
-    final photoStatus = await Permission.photos.request();
-
-    if (status.isDenied || photoStatus.isDenied) {
-      throw Exception('Camera or photo library permission denied');
-    }
-
-    if (status.isPermanentlyDenied || photoStatus.isPermanentlyDenied) {
-      // Open app settings so user can enable permissions
-      await openAppSettings();
-    }
   }
 
   Future<void> _getOrCreateUuid() async {
@@ -63,7 +47,7 @@ class FirebaseService {
 
       await _firestore.collection('users').doc(_uuid).set({
         'uuid': _uuid,
-        'nickname': '삼붕이$nextNumber',
+        'nickname': '삼붕이 $nextNumber',
       });
     }
 
@@ -141,6 +125,28 @@ class FirebaseService {
         'senderNickname': senderNickname,
       });
     });
+  }
+
+  Future<List<Map<String, dynamic>>> getNotifications() async {
+    try {
+      final snapshot = await _firestore
+          .collection('notifications')
+          .orderBy('timestamp', descending: true)
+          .get();
+
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        return {
+          'id': doc.id,
+          'title': data['title'] ?? '',
+          'content': data['content'] ?? '',
+          'timestamp': data['timestamp'] ?? 0,
+        };
+      }).toList();
+    } catch (e) {
+      print('Error getting notifications: $e');
+      return [];
+    }
   }
 
   void dispose() {

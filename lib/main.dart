@@ -45,8 +45,35 @@ class _ChatAppState extends State<ChatApp> {
     return MaterialApp(
       title: '3-3 오래 고민하지 말고 오늘 해결하자',
       theme: ThemeData(
-        primarySwatch: Colors.deepOrange,
+        primarySwatch: Colors.green,
+        colorScheme: ColorScheme.dark(
+          primary: Colors.green[800]!,
+          secondary: Colors.green[700]!,
+          surface: Colors.green[100]!,
+          onPrimary: Colors.white,
+          onSecondary: Colors.white,
+          onSurface: Colors.green[900]!,
+        ),
         useMaterial3: true,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.green[900],
+          foregroundColor: Colors.green[100],
+        ),
+        navigationBarTheme: NavigationBarThemeData(
+          backgroundColor: Colors.green[900],
+          indicatorColor: Colors.green[800],
+          labelTextStyle: WidgetStateProperty.all(
+            TextStyle(
+              color: Colors.white,
+              fontFamily: "Pat",
+            ),
+          ),
+          iconTheme: WidgetStateProperty.all(
+            IconThemeData(
+              color: Colors.green[300],
+            ),
+          ),
+        ),
       ),
       home: Scaffold(
         body: _pages[_selectedIndex],

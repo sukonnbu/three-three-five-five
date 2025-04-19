@@ -4,7 +4,7 @@
     <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED"/>
     <uses-permission android:name="android.permission.CAMERA" />
     <application
-        android:label="ttff"
+        android:label="삼삼오오 - 오래 고민하지 말고 오늘 해결하자"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
