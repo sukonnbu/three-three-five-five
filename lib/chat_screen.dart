@@ -64,14 +64,52 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _sendImageMessage() async {
     try {
       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-      if (image != null) {
-        final imageUrl =
-            await _firebase.uploadImage(File(image.path), widget.roomNumber);
-        _firebase.sendImageMessage(imageUrl, widget.roomNumber);
-      }
+      if (image == null) return;
+
+      // 로딩 다이얼로그 표시
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.green[700]!),
+              ),
+              SizedBox(height: 16),
+              Text(
+                '이미지 업로드 중...',
+                style: TextStyle(
+                  fontFamily: "Pat",
+                  fontSize: 16,
+                  color: Colors.green[800],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final imageUrl =
+          await _firebase.uploadImage(File(image.path), widget.roomNumber);
+      _firebase.sendImageMessage(imageUrl, widget.roomNumber);
+
+      // 로딩 다이얼로그 닫기
+      Navigator.of(context).pop();
     } catch (e) {
+      // 에러 발생 시 로딩 다이얼로그 닫기
+      Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error sending image: $e')),
+        SnackBar(
+          content: Text(
+            '이미지 업로드 중 오류가 발생했습니다.',
+            style: TextStyle(
+              fontFamily: "Pat",
+            ),
+          ),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -241,8 +279,9 @@ class _ChatScreenState extends State<ChatScreen> {
                             MaterialPageRoute(
                               builder: (context) => Scaffold(
                                 appBar: AppBar(
+                                  centerTitle: true,
                                   title: Text(
-                                    '자세히 보기',
+                                    '이미지 자세히 보기',
                                     style: TextStyle(
                                       fontSize: 26,
                                       fontFamily: "Pat",
@@ -258,21 +297,23 @@ class _ChatScreenState extends State<ChatScreen> {
                             ),
                           );
                         },
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: Image.network(
-                            content,
-                            width: 200,
-                            height: 200,
-                            fit: BoxFit.cover,
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return CircularProgressIndicator();
-                            },
-                            errorBuilder: (context, error, stackTrace) {
-                              return Text('Error loading image');
-                            },
-                          ),
+                        child: Image.network(
+                          content,
+                          width: 200,
+                          height: 200,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) {
+                              return ClipRRect(
+                                borderRadius: BorderRadius.circular(8.0),
+                                child: child,
+                              );
+                            }
+                            return CircularProgressIndicator();
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return Text('Error loading image');
+                          },
                         ),
                       ),
               ],
@@ -333,7 +374,11 @@ class _ChatScreenState extends State<ChatScreen> {
                     controller: _controller,
                     decoration: InputDecoration(
                       hintText: '질문하고 답하기',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.green[700]!,
+                        ),
+                      ),
                     ),
                     style: TextStyle(
                       fontFamily: "Pat",

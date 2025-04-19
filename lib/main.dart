@@ -50,14 +50,22 @@ class _ChatAppState extends State<ChatApp> {
           primary: Colors.green[800]!,
           secondary: Colors.green[700]!,
           surface: Colors.green[100]!,
-          onPrimary: Colors.white,
-          onSecondary: Colors.white,
+          onPrimary: Colors.green,
+          onSecondary: Colors.green,
           onSurface: Colors.green[900]!,
         ),
         useMaterial3: true,
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.green[900],
           foregroundColor: Colors.green[100],
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.green[700]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.green[700]!, width: 2),
+          ),
         ),
         navigationBarTheme: NavigationBarThemeData(
           backgroundColor: Colors.green[900],
